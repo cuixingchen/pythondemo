@@ -21,25 +21,47 @@ Popen对象创建后，主程序不会自动等待子进程完成。我们必须
 
 
 class SubprocessDemo:
-    def testPing(self):
+    @staticmethod
+    def test_ping():
         child = subprocess.Popen(["ping", "-c", "5", "www.google.com"])
         print(child.poll())
         child.wait()
         print("parent process")
 
-    def testDh(self):
+    @staticmethod
+    def test_dh():
         p = subprocess.Popen("df -h",
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, shell=True)
-        print(p.poll())
-        # if p.poll() is None:
-        #     p.terminate()
-        # p.wait()
-        p.communicate()
-        print(p.returncode)
-        print("end")
+        SubprocessDemo.print_stout(p)
+        print("test_dh_end")
+
+    @staticmethod
+    def start_mongodb():
+        echo = subprocess.Popen(['echo', SubprocessDemo.getpass()], stdout=subprocess.PIPE)
+        p = subprocess.Popen("sudo -S /opt/mongodb-linux-x86_64-ubuntu1604-3.4.2/bin/mongod",
+                             stdin=echo.stdout,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, shell=True)
+        SubprocessDemo.print_stout(p)
+        print("start_mongodb_end")
+
+    @staticmethod
+    def getpass():
+        return "123456"
+
+    @staticmethod
+    def print_stout(p):
+        return_code = p.poll()
+        while return_code is None:
+            line = p.stdout.readline()
+            return_code = p.poll()
+            line = line.strip()
+            print(line)
+        print(return_code)
 
 x = SubprocessDemo()
 # x.testPing()
-x.testDh()
+# x.testDh()
+x.testStartMongo()
